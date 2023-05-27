@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Estilos CSS */
+    /* Adapte os estilos conforme suas necessidades */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .message {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cadastro de Alunos</h1>
+    <form id="studentForm">
+      <input type="text" name="name" placeholder="Nome" required>
+      <input type="email" name="email" placeholder="E-mail" required>
+      <select name="class" required>
+        <option value="">Selecione uma turma</option>
+        <option value="Turma A">Turma A</option>
+        <option value="Turma B">Turma B</option>
+        <option value="Turma C">Turma C</option>
+      </select>
+      <button type="submit">Cadastrar</button>
+    </form>
+    <div class="message" id="message"></div>
+
+    <h2>Alunos Cadastrados</h2>
+    <input type="text" id="searchInput" placeholder="Buscar aluno">
+    <div id="studentsList"></div>
+  </div>
+
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js"></script>
+
+  <script>
+    // Configuração do Firebase
+    var firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_DOMINIO.firebaseapp.com",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_BUCKET.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    // Inicializar o Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Referência para a coleção de alunos no Firestore
+    var studentsCollection = firebase.firestore().collection("students");
+
+    // Manipulador de evento para o formulário de cadastro
+    document.getElementById("studentForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Evitar o envio do formulário
+
+      // Obter os valores do formulário
+      var name = document.getElementsByName("name")[0].value;
+      var email = document.getElementsByName("email")[0].value;
+      var classValue = document.getElementsByName("class")[0].value;
+
+      // Salvar os dados no Firestore
+      studentsCollection.add({
+        name: name,
+        email: email,
+        class: classValue
+      })
+      .then(function(docRef) {
+        // Limpar o formulário
+        document.getElementById("studentForm").reset();
+
+        // Exibir mensagem de sucesso
+        showMessage("success", "Aluno cadastrado com sucesso!");
+
+        // Atualizar a lista de alunos
+        updateStudentsList();
+      })
+      .catch(function(error) {
+        // Exibir mensagem de erro
+        showMessage("error", "Erro ao cadastrar aluno: " + error.message);
+      });
+    });
+
+    // Manipulador de evento para o campo de busca
+    document.getElementById("searchInput").addEventListener("input", function() {
+      var searchValue = this.value.toLowerCase();
+      var studentsList = document.getElementById("studentsList");
+      var cards = studentsList.getElementsByClassName("card");
+
+      // Mostrar ou ocultar os cards de acordo com o valor de busca
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var name = card.getElementsByClassName("name")[0].textContent.toLowerCase();
+        if (name.includes(searchValue)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      }
+    });
+
+    // Atualizar a lista de alunos
+    function updateStudentsList() {
+      studentsCollection.get().then(function(querySnapshot) {
+        var studentsList = document.getElementById("studentsList");
+        studentsList.innerHTML = "";
+
+        querySnapshot.forEach(function(doc) {
+          var student = doc.data();
+
+          // Criar um card para o aluno
+          var card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = "<strong>Nome:</strong> <span class='name'>" + student.name + "</span><br>" +
+                           "<strong>E-mail:</strong> " + student.email + "<br>" +
+                           "<strong>Turma:</strong> " + student.class;
+          studentsList.appendChild(card);
+        });
+      });
+    }
+
+    // Exibir mensagem na tela
+    function showMessage(type, message) {
+      var messageDiv = document.getElementById("message");
+      messageDiv.textContent = message;
+      messageDiv.className = "message " + type;
+      messageDiv.style.display = "block";
+      setTimeout(function() {
+        messageDiv.style.display = "none";
+      }, 3000);
+    }
+
+    // Inicializar a lista de alunos
+    updateStudentsList();
+  </script>
+</body>
+</html>
