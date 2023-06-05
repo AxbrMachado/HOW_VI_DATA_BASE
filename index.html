@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* Estilos CSS */
-    /* Adapte os estilos conforme suas necessidades */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -67,12 +66,12 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <di class="container">
     <h1>Cadastro de Alunos</h1>
     <form id="studentForm">
       <input type="text" name="name" placeholder="Nome" required>
       <input type="email" name="email" placeholder="E-mail" required>
-      <input type="number" name="Idade" placeholder="Idade" required>
+      <input type="number" name="idade" placeholder="Idade" required>
       <select name="class" required>
         <option value="">Selecione uma turma</option>
         <option value="Turma A">Turma A</option>
@@ -85,23 +84,17 @@
 
     <h2>Alunos Cadastrados</h2>
     <input type="text" id="searchInput" placeholder="Buscar aluno">
+    <button type="submit">Pesquisar</button>
     <div id="studentsList"></div>
   </div>
-
-  <!-- Firebase JavaScript SDK -->
-  <!-- <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js"></script> -->
-  <!-- <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js"></script> -->
 
   <script type="module">
 
   // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyAy5EV-bxUgt5HM-Dr7B88XcGArNJwTOog",
     authDomain: "howdbcadaluno.firebaseapp.com",
@@ -115,93 +108,73 @@
     // Inicializar o Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
-    //firebase.initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
 
-    // Referência para a coleção de alunos no Firestore
-    //var studentsCollection = firebase.firestore().collection("cadAlunos");
+    // Função para cadastrar um aluno
+    async function addStudent(event) {
+      event.preventDefault();
 
-    // Manipulador de evento para o formulário de cadastro
-    document.getElementById("studentForm").addEventListener("submit", function(event) {
-      event.preventDefault(); // Evitar o envio do formulário
+      const name = studentForm.name.value;
+      const email = studentForm.email.value;
+      const idade = studentForm.idade.value;
+      const turma = studentForm.class.value;
 
-      // Obter os valores do formulário
-      var name = document.getElementsByName("name")[0].value;
-      var email = document.getElementsByName("email")[0].value;
-      var classValue = document.getElementsByName("class")[0].value;
+      try {
+        // Adicionar um documento à coleção "alunos"
+        await addDoc(collection(firestore, 'alunos'), {
+          name: name,
+          email: email,
+          idade: idade,
+          turma: turma
+        });
+    // Limpar os campos do formulário após o cadastro
+    studentForm.reset();
 
-      // Salvar os dados no Firestore
-      cadAlunosCollection.add({
-        name: name,
-        email: email,
-        class: classValue
-      })
-      .then(function(docRef) {
-        // Limpar o formulário
-        document.getElementById("studentForm").reset();
-
-        // Exibir mensagem de sucesso
-        showMessage("success", "Aluno cadastrado com sucesso!");
-
-        // Atualizar a lista de alunos
-        updateStudentsList();
-      })
-      .catch(function(error) {
-        // Exibir mensagem de erro
-        showMessage("error", "Erro ao cadastrar aluno: " + error.message);
-      });
-    });
-
-    // Manipulador de evento para o campo de busca
-    document.getElementById("searchInput").addEventListener("input", function() {
-      var searchValue = this.value.toLowerCase();
-      var studentsList = document.getElementById("studentsList");
-      var cards = studentsList.getElementsByClassName("card");
-
-      // Mostrar ou ocultar os cards de acordo com o valor de busca
-      for (var i = 0; i < cards.length; i++) {
-        var card = cards[i];
-        var name = card.getElementsByClassName("name")[0].textContent.toLowerCase();
-        if (name.includes(searchValue)) {
-          card.style.display = "block";
-        } else {
-          card.style.display = "none";
-        }
-      }
-    });
-
-    // Atualizar a lista de alunos
-    // function updateStudentsList() {
-    //   studentsCollection.get().then(function(querySnapshot) {
-    //     var studentsList = document.getElementById("studentsList");
-    //     studentsList.innerHTML = "";
-
-    //     querySnapshot.forEach(function(doc) {
-    //       var student = doc.data();
-
-    //       // Criar um card para o aluno
-    //       var card = document.createElement("div");
-    //       card.className = "card";
-    //       card.innerHTML = "<strong>Nome:</strong> <span class='name'>" + student.name + "</span><br>" +
-    //                        "<strong>E-mail:</strong> " + student.email + "<br>" +
-    //                        "<strong>Turma:</strong> " + student.class;
-    //       studentsList.appendChild(card);
-    //     });
-    //   });
-    // }
-
-    // Exibir mensagem na tela
-    function showMessage(type, message) {
-      var messageDiv = document.getElementById("message");
-      messageDiv.textContent = message;
-      messageDiv.className = "message " + type;
-      messageDiv.style.display = "block";
-      setTimeout(function() {
-        messageDiv.style.display = "none";
-      }, 3000);
+    // Exibir mensagem de sucesso
+    showMessage('success', 'Aluno cadastrado com sucesso!');
+    } catch (error) {
+    // Exibir mensagem de erro, se houver algum problema
+    showMessage('error', 'Erro ao cadastrar o aluno: ' + error.message);
+    }
     }
 
-    // Inicializar a lista de alunos
-    //updateStudentsList();
+    // Função para pesquisar alunos
+      function searchStudents() {
+      const searchValue = searchInput.value.trim().toLowerCase();
+
+      // Limpa a lista de alunos antes de realizar a pesquisa
+      studentsList.innerHTML = '';
+// Consultar os documentos na coleção "alunos" com base no nome
+const q = query(collection(firestore, 'alunos'), where('name', '>=', searchValue));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        snapshot.forEach((doc) => {
+          const student = doc.data();
+
+          // Criar um elemento de card para exibir o aluno
+          const card = document.createElement('div');
+          card.classList.add('card');
+
+          // Adicionar os detalhes do aluno ao card
+          card.innerHTML = `
+            <h3>${student.name}</h3>
+            <p>Email: ${student.email}</p>
+            <p>Idade: ${student.idade}</p>
+            <p>Turma: ${student.turma}</p>
+          `;
+            // Adiciona o card à lista de alunos
+            studentsList.appendChild(card);
+          })
+        });
+    // Função auxiliar para exibir mensagens
+    function showMessage(type, text) {
+      message.textContent = text;
+      message.className = 'message ' + type;
+      message.style.display = 'block';
+    }
+
+    // Adiciona um listener para o evento de envio do formulário
+    studentForm.addEventListener('submit', addStudent);
+  };
   </script>
 </body>
 </html>
