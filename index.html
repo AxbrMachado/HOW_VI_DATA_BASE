@@ -76,9 +76,9 @@
       <input type="number" name="idade" placeholder="Idade" id="idade" required>
       <select name="class" id="class" required>
         <option value="">Selecione uma turma</option>
-        <option value="Turma A">Turma A</option>
-        <option value="Turma B">Turma B</option>
-        <option value="Turma C">Turma C</option>
+        <option value="A">Turma A</option>
+        <option value="B">Turma B</option>
+        <option value="C">Turma C</option>
       </select>
       <div></div>
       <button type="submit">Cadastrar</button>
@@ -87,7 +87,7 @@
 
     <h2>Alunos Cadastrados</h2>
     <input type="text" id="searchInput" placeholder="Buscar aluno">
-    <button type="submit">Pesquisar</button>
+    <button type="submit" id="btnPesquisar">Pesquisar</button>
     <div id="studentsList"></div>
   </div>
   <script type="module">
@@ -113,24 +113,99 @@
     const firestore = getFirestore(app);
 
     // cadastrar no BD
+    // Capturar o formulário
+    const form = document.getElementById('studentForm');
+    const searchInput = document.getElementById('searchInput');
+    // Definir o evento de clique do botão de pesquisa
+    document.getElementById('btnPesquisar').addEventListener('click', function(event) {
+    event.preventDefault(); // Impede o envio do formulário
 
-    
-    // Definindo os dados a serem inseridos
+    const searchTerm = searchInput.value.trim();
+
+    if (searchTerm !== '') {
+      // Criar uma consulta para buscar alunos com base no termo de pesquisa
+      const q = query(collection(firestore, 'cadAlunos'), where('nome', '==', searchTerm));
+
+      // Realizar a consulta
+      getDocs(q)
+        .then((querySnapshot) => {
+          // Limpar a lista de alunos antes de exibir os resultados da pesquisa
+          studentsList.innerHTML = '';
+
+          // Exibir os resultados da pesquisa
+          querySnapshot.forEach((doc) => {
+            const aluno = doc.data();
+            const alunoItem = document.createElement('p');
+            alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
+            studentsList.appendChild(alunoItem);
+          });
+        })
+        .catch((error) => {
+          console.log('Erro ao realizar a consulta:', error);
+        });
+    } else {
+      // Se o campo de pesquisa estiver vazio, exibir todos os alunos cadastrados
+      getDocs(collection(firestore, 'cadAlunos'))
+        .then((querySnapshot) => {
+          // Limpar a lista de alunos antes de exibir todos os resultados
+          studentsList.innerHTML = '';
+
+          // Exibir todos os alunos cadastrados
+          querySnapshot.forEach((doc) => {
+            const aluno = doc.data();
+            const alunoItem = document.createElement('p');
+            alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
+            studentsList.appendChild(alunoItem);
+          });
+        })
+        .catch((error) => {
+          console.log('Erro ao realizar a consulta:', error);
+        });
+    }
+  });
+    // Definir o evento de envio do formulário
+    form.addEventListener('submit', function(event) {
+    event.preventDefault(); // Impede o envio do formulário
+
+    // Capturar os valores inseridos nos campos de input
+    const nome = document.getElementById('nome').value;
+    const idade = document.getElementById('idade').value;
+    const email = document.getElementById('email').value;
+    const turma = document.getElementById('class').value;
+    // Atualizar o objeto dados com os valores inseridos
     const dados = {
-    nome: 'Exemplo',
-    idade: 25,
-    email: 'exemplo@example.com',
-    turma: 'A'
+      nome: nome,
+      idade: idade,
+      email: email,
+      turma: turma
     };
-
-    // Inserindo os dados no Firestore
+    // Inserir os dados no Firestore
     addDoc(collection(firestore, 'cadAlunos'), dados)
       .then((docRef) => {
         console.log('Dados inseridos com sucesso! ID do documento:', docRef.id);
+        form.reset(); // Limpar o formulário após o envio
       })
       .catch((error) => {
         console.log('Erro ao inserir dados:', error);
       });
+    });
+    
+    // Definindo os dados a serem inseridos
+    // const dados = {
+    // nome: 'Exemplo',
+    // idade: 25,
+    // email: 'exemplo@example.com',
+    // turma: 'A'
+    // };
+
+    // Inserindo os dados no Firestore
+    // addDoc(collection(firestore, 'cadAlunos'), dados)
+    //   .then((docRef) => {
+    //     console.log('Dados inseridos com sucesso! ID do documento:', docRef.id);
+    //   })
+    //   .catch((error) => {
+    //     console.log('Erro ao inserir dados:', error);
+    //   });
 
   </script>
 </body>
