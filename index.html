@@ -19,8 +19,9 @@
     input[type="text"],
     input[type="email"],
     input[type="number"],
+    input[name="class"],
     select {
-      width: 100%;
+      width: 46%;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
@@ -69,15 +70,17 @@
   <di class="container">
     <h1>Cadastro de Alunos</h1>
     <form id="studentForm">
-      <input type="text" name="name" placeholder="Nome" required>
-      <input type="email" name="email" placeholder="E-mail" required>
-      <input type="number" name="idade" placeholder="Idade" required>
-      <select name="class" required>
+      <h2 id="idAluno"></h2>
+      <input type="text" name="name" placeholder="Nome" id="nome" required>
+      <input type="email" name="email" placeholder="E-mail"id="email"  required>
+      <input type="number" name="idade" placeholder="Idade" id="idade" required>
+      <select name="class" id="class" required>
         <option value="">Selecione uma turma</option>
         <option value="Turma A">Turma A</option>
         <option value="Turma B">Turma B</option>
         <option value="Turma C">Turma C</option>
       </select>
+      <div></div>
       <button type="submit">Cadastrar</button>
     </form>
     <div class="message" id="message"></div>
@@ -87,7 +90,6 @@
     <button type="submit">Pesquisar</button>
     <div id="studentsList"></div>
   </div>
-
   <script type="module">
 
   // Import the functions you need from the SDKs you need
@@ -110,71 +112,26 @@
     const analytics = getAnalytics(app);
     const firestore = getFirestore(app);
 
-    // Função para cadastrar um aluno
-    async function addStudent(event) {
-      event.preventDefault();
+    // cadastrar no BD
 
-      const name = studentForm.name.value;
-      const email = studentForm.email.value;
-      const idade = studentForm.idade.value;
-      const turma = studentForm.class.value;
+    
+    // Definindo os dados a serem inseridos
+    const dados = {
+    nome: 'Exemplo',
+    idade: 25,
+    email: 'exemplo@example.com',
+    turma: 'A'
+    };
 
-      try {
-        // Adicionar um documento à coleção "alunos"
-        await addDoc(collection(firestore, 'alunos'), {
-          name: name,
-          email: email,
-          idade: idade,
-          turma: turma
-        });
-    // Limpar os campos do formulário após o cadastro
-    studentForm.reset();
+    // Inserindo os dados no Firestore
+    addDoc(collection(firestore, 'cadAlunos'), dados)
+      .then((docRef) => {
+        console.log('Dados inseridos com sucesso! ID do documento:', docRef.id);
+      })
+      .catch((error) => {
+        console.log('Erro ao inserir dados:', error);
+      });
 
-    // Exibir mensagem de sucesso
-    showMessage('success', 'Aluno cadastrado com sucesso!');
-    } catch (error) {
-    // Exibir mensagem de erro, se houver algum problema
-    showMessage('error', 'Erro ao cadastrar o aluno: ' + error.message);
-    }
-    }
-
-    // Função para pesquisar alunos
-      function searchStudents() {
-      const searchValue = searchInput.value.trim().toLowerCase();
-
-      // Limpa a lista de alunos antes de realizar a pesquisa
-      studentsList.innerHTML = '';
-// Consultar os documentos na coleção "alunos" com base no nome
-const q = query(collection(firestore, 'alunos'), where('name', '>=', searchValue));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        snapshot.forEach((doc) => {
-          const student = doc.data();
-
-          // Criar um elemento de card para exibir o aluno
-          const card = document.createElement('div');
-          card.classList.add('card');
-
-          // Adicionar os detalhes do aluno ao card
-          card.innerHTML = `
-            <h3>${student.name}</h3>
-            <p>Email: ${student.email}</p>
-            <p>Idade: ${student.idade}</p>
-            <p>Turma: ${student.turma}</p>
-          `;
-            // Adiciona o card à lista de alunos
-            studentsList.appendChild(card);
-          })
-        });
-    // Função auxiliar para exibir mensagens
-    function showMessage(type, text) {
-      message.textContent = text;
-      message.className = 'message ' + type;
-      message.style.display = 'block';
-    }
-
-    // Adiciona um listener para o evento de envio do formulário
-    studentForm.addEventListener('submit', addStudent);
-  };
   </script>
 </body>
 </html>
