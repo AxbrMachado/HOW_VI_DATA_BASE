@@ -111,7 +111,7 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const firestore = getFirestore(app);
-
+    //COnsultar tabela de Grade
     getDocs(collection(firestore, 'gradePorTurma'));
     const grade = query(collection(firestore, "gradePorTurma"));
     console.log(grade);
@@ -135,7 +135,7 @@
     if (searchTerm !== '') {
       // Criar uma consulta para buscar alunos com base no termo de pesquisa
       const q = query(collection(firestore, 'cadAlunos'), where('nome', '==', searchTerm));
-
+      
       // Realizar a consulta
       getDocs(q)
         .then((querySnapshot) => {
@@ -145,6 +145,8 @@
           // Exibir os resultados da pesquisa
           querySnapshot.forEach((doc) => {
             const aluno = doc.data();
+            const turmaDisc = '';
+            console.log(turmaDisc);
             const alunoItem = document.createElement('p');
             alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
             studentsList.appendChild(alunoItem);
