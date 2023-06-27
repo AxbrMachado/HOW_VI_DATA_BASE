@@ -112,6 +112,16 @@
     const analytics = getAnalytics(app);
     const firestore = getFirestore(app);
 
+    getDocs(collection(firestore, 'gradePorTurma'));
+    const grade = query(collection(firestore, "gradePorTurma"));
+    console.log(grade);
+    getDocs(grade)
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const grade = doc.data();
+              console.log(grade);
+          });
+        });
     // cadastrar no BD
     // Capturar o formulário
     const form = document.getElementById('studentForm');
