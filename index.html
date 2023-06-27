@@ -112,16 +112,16 @@
     const analytics = getAnalytics(app);
     const firestore = getFirestore(app);
     //COnsultar tabela de Grade
-    getDocs(collection(firestore, 'gradePorTurma'));
-    const grade = query(collection(firestore, "gradePorTurma"));
-    console.log(grade);
-    getDocs(grade)
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            const grade = doc.data();
-              console.log(grade);
-          });
-        });
+    // getDocs(collection(firestore, 'gradePorTurma'));
+    // const grade = query(collection(firestore, "gradePorTurma"));
+    // console.log(grade);
+    // getDocs(grade)
+    //     .then((querySnapshot) => {
+    //       querySnapshot.forEach((doc) => {
+    //         const grade = doc.data();
+    //           console.log(grade);
+    //       });
+    //     });
     // cadastrar no BD
     // Capturar o formulário
     const form = document.getElementById('studentForm');
@@ -135,7 +135,7 @@
     if (searchTerm !== '') {
       // Criar uma consulta para buscar alunos com base no termo de pesquisa
       const q = query(collection(firestore, 'cadAlunos'), where('nome', '==', searchTerm));
-      
+      const turmaId = query(collection(firestore, 'gradePorTurma'));
       // Realizar a consulta
       getDocs(q)
         .then((querySnapshot) => {
@@ -145,8 +145,19 @@
           // Exibir os resultados da pesquisa
           querySnapshot.forEach((doc) => {
             const aluno = doc.data();
-            const turmaDisc = '';
-            console.log(turmaDisc);
+            getDocs(collection(firestore, 'gradePorTurma'));
+            const turma = query(collection(firestore, "gradePorTurma"));
+            getDocs(turma)
+            .then((querySnapshot) => {
+              querySnapshot.forEach((doc) => {
+                const grade = doc.data();
+                const gradeT = document.createElement('p');
+                gradeT.textContent = `Turma: ${aluno.turma}, Discp: ${grade.Disciplina1} e ${grade.Disciplina2}`;
+                console.log(gradeT);
+                studentsList.appendChild(gradeT);
+                });
+              });
+            console.log(turma);
             const alunoItem = document.createElement('p');
             alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
             studentsList.appendChild(alunoItem);
