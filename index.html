@@ -114,7 +114,6 @@
     //COnsultar tabela de Grade
     // getDocs(collection(firestore, 'gradePorTurma'));
     // const grade = query(collection(firestore, "gradePorTurma"));
-    // console.log(grade);
     // getDocs(grade)
     //     .then((querySnapshot) => {
     //       querySnapshot.forEach((doc) => {
@@ -135,7 +134,6 @@
     if (searchTerm !== '') {
       // Criar uma consulta para buscar alunos com base no termo de pesquisa
       const q = query(collection(firestore, 'cadAlunos'), where('nome', '==', searchTerm));
-      const turmaId = query(collection(firestore, 'gradePorTurma'));
       // Realizar a consulta
       getDocs(q)
         .then((querySnapshot) => {
@@ -145,19 +143,17 @@
           // Exibir os resultados da pesquisa
           querySnapshot.forEach((doc) => {
             const aluno = doc.data();
-            getDocs(collection(firestore, 'gradePorTurma'));
-            const turma = query(collection(firestore, "gradePorTurma"));
-            getDocs(turma)
-            .then((querySnapshot) => {
-              querySnapshot.forEach((doc) => {
-                const grade = doc.data();
-                const gradeT = document.createElement('p');
-                gradeT.textContent = `Turma: ${aluno.turma}, Discp: ${grade.Disciplina1} e ${grade.Disciplina2}`;
-                console.log(gradeT);
-                studentsList.appendChild(gradeT);
-                });
+            const turmaId = query(collection(firestore, 'gradePorTurma'), where('id', '==', aluno.turma));
+            getDocs(turmaId)
+              .then((querySnapshot) => {
+            querySnapshot.forEach((turma) => {
+            const grade = turma.data();
+              console.log(grade);
+              const turmaId= document.createElement('p');
+              turmaId.textContent = `Disciplinas: ${grade.Disciplina1} e ${grade.Disciplina2}`;
+              studentsList.appendChild(turmaId);
               });
-            console.log(turma);
+            });
             const alunoItem = document.createElement('p');
             alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
             studentsList.appendChild(alunoItem);
