@@ -149,7 +149,8 @@
             querySnapshot.forEach((turma) => {
             const grade = turma.data();
               console.log(grade);
-              const turmaId= document.createElement('p');
+              console.log(aluno);
+              const turmaId= document.createElement('div','p');
               turmaId.textContent = `Disciplinas: ${grade.Disciplina1} e ${grade.Disciplina2}`;
               studentsList.appendChild(turmaId);
               });
@@ -160,7 +161,7 @@
           });
         })
         .catch((error) => {
-          console.log('Erro ao realizar a consulta:', error);
+              console.log('Erro ao realizar a consulta:', error);
         });
     } else {
       // Se o campo de pesquisa estiver vazio, exibir todos os alunos cadastrados
@@ -175,6 +176,7 @@
             const alunoItem = document.createElement('p');
             alunoItem.textContent = `Nome: ${aluno.nome}, Idade: ${aluno.idade}, E-mail: ${aluno.email}, Turma: ${aluno.turma}`;
             studentsList.appendChild(alunoItem);
+            console.log(alunoItem)
           });
         })
         .catch((error) => {
